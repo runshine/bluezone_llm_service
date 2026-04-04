@@ -1,0 +1,32 @@
+name: "Minimax-m2.5"
+services:
+  vllm:
+    image: vllm/vllm-openai:nightly
+    runtime: nvidia
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              #count: all
+              device_ids: ['0','1','2','3']
+              capabilities: [gpu]
+    volumes:
+      - ~/.cache/huggingface:/root/.cache/huggingface
+      - /data/models:/data/models
+      - ./start.sh:/data/start.sh
+    ports:
+      - "8003:8000"
+    restart: unless-stopped
+    environment:
+      - TZ=Asia/Shanghai
+      - VLLM_USE_DEEP_GEMM=0
+      - export VLLM_USE_FLASHINFER_MOE_FP16=1
+      - VLLM_USE_FLASHINFER_SAMPLER=0
+      - OMP_NUM_THREADS=4
+      - VLLM_USE_MODELSCOPE=false
+      - MODELSCOPE_DISABLE_HF_PATCH=1
+      - NVIDIA_VISIBLE_DEVICES=all
+    entrypoint: "/data/start.sh"
+    # Replace with your model
+    ipc: host

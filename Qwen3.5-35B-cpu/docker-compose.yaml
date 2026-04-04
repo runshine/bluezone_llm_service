@@ -1,0 +1,29 @@
+name: "QWEN3.5-35B-CPU"
+services:
+  llama-cpp:
+    image: ghcr.io/ggml-org/llama.cpp:server
+    volumes:
+      - /data/models:/models
+    ports:
+      - "8002:8080"
+    restart: unless-stopped
+    environment:
+      - TZ=Asia/Shanghai
+    command:
+      - -m
+      - /models/unsloth/Qwen3.5-9B-GGUF/Qwen3.5-9B-Q4_K_M.gguf
+      - --mmproj
+      - /models/unsloth/Qwen3.5-9B-GGUF/mmproj-F16.gguf
+      - --host
+      - "0.0.0.0"
+      - --port
+      - "8080"
+      - --ctx-size
+      - "262144"
+      - --threads
+      - "160"
+      - --n-gpu-layers
+      - "0"
+      - --batch-size
+      - "512"
+    ipc: host
