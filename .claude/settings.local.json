@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(cd /data/bluezone_llm_service/Qwen3.5-35B-cpu && docker compose up -d)",
+      "Bash(docker compose:*)",
+      "WebSearch",
+      "WebFetch(domain:docs.vllm.ai)",
+      "Bash(gh search:*)"
+    ]
+  }
+}
