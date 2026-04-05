@@ -11,10 +11,10 @@ export VLLM_ALLOW_LONG_MAX_MODEL_LEN=1
 
 # apt update && apt install -y git
 # pip install git+https://github.com/huggingface/transformers.git
-
 # pip install mooncake-transfer-engine
+#pip install transformers==5.5.0
 
-vllm serve /data/models/google/gemma-4-31B \
+vllm serve /data/models/google/gemma-4-31B-it-AWQ-8bit \
     --served-model-name 'google/gemma-4-31B' \
     --max-num-seqs 32 \
     --gpu-memory-utilization 0.95 \
@@ -25,6 +25,4 @@ vllm serve /data/models/google/gemma-4-31B \
     --trust-remote-code \
     --host 0.0.0.0 \
     --port 8000 \
-    --mm-encoder-tp-mode data \
-    --mm-processor-cache-type shm \
     --max-model-len 268288
