@@ -17,11 +17,11 @@ ls /dev/nvidia*
 
 vllm serve /data/models/tclf90/GLM-5-AWQ \
     --served-model-name 'zai-org/GLM-5' \
-    --max-num-seqs 64 \
+    --max-num-seqs 8 \
     --max-model-len 202752 \
     --enable-chunked-prefill \
-    --max-num-batched-tokens 16384 \
-    --gpu-memory-utilization 0.93 \
+    --max-num-batched-tokens 4096 \
+    --gpu-memory-utilization 0.92 \
     --enable-prefix-caching \
     --enable-expert-parallel \
     --tensor-parallel-size 4 \
@@ -31,5 +31,7 @@ vllm serve /data/models/tclf90/GLM-5-AWQ \
     --trust-remote-code \
     --host 0.0.0.0 \
     --port 8000 \
+    --async-scheduling \
     --speculative-config '{"method":"mtp", "num_speculative_tokens":1}' 
+    
 
