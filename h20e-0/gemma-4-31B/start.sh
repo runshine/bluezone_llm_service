@@ -17,8 +17,12 @@ export VLLM_ALLOW_LONG_MAX_MODEL_LEN=1
 vllm serve /data/models/google/gemma-4-31B-it-AWQ-8bit \
     --served-model-name 'google/gemma-4-31B' \
     --max-num-seqs 32 \
+    --enable-chunked-prefill \
+    --max-num-batched-tokens 16384 \
+    --enable-prefix-caching \
     --gpu-memory-utilization 0.95 \
-    --tensor-parallel-size 2\
+    --async-scheduling \
+    --tensor-parallel-size 4\
     --enable-auto-tool-choice \
     --reasoning-parser gemma4 \
     --tool-call-parser gemma4 \

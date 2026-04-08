@@ -9,7 +9,7 @@ services:
           devices:
             - driver: nvidia
               #count: all
-              device_ids: ['4','6']
+              device_ids: ['2','3','4','6']
               capabilities: [gpu]
     volumes:
       - ~/.cache/huggingface:/root/.cache/huggingface

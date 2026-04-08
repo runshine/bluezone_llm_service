@@ -1,7 +1,7 @@
-name: "GLM-5-AWQ-01"
+name: "Minimax-m2.5"
 services:
-  vllm:
-    image: vllm/vllm-openai:v0.17.1
+  vllm-minimax-m2.5-awq:
+    image: vllm/vllm-openai:nightly
     runtime: nvidia
     deploy:
       resources:
@@ -9,27 +9,24 @@ services:
           devices:
             - driver: nvidia
               #count: all
-              device_ids: ['4', '5', '6', '7']
+              device_ids: ['4','5']
               capabilities: [gpu]
     volumes:
       - ~/.cache/huggingface:/root/.cache/huggingface
-      - /data/models:/data/models:ro
-      - ./start.sh:/data/start.sh:ro
-      - ./glm4_mtp_fix.py:/data/glm4_mtp_fix.py:ro
+      - /data/models:/data/models
+      - ./start.sh:/data/start.sh
     ports:
-      - "8004:8000"
+      - "8003:8000"
     restart: unless-stopped
     environment:
       - TZ=Asia/Shanghai
-      - VLLM_USE_FLASHINFER_MOE_FP16=1
+      - VLLM_USE_DEEP_GEMM=0
+      - export VLLM_USE_FLASHINFER_MOE_FP16=1
       - VLLM_USE_FLASHINFER_SAMPLER=0
       - OMP_NUM_THREADS=4
-      - VLLM_WORKER_MULTIPROC_METHOD=spawn
-      - VLLM_MEMORY_EFFICIENT_ATTENTION=1
       - VLLM_USE_MODELSCOPE=false
       - MODELSCOPE_DISABLE_HF_PATCH=1
       - NVIDIA_VISIBLE_DEVICES=all
     entrypoint: "/data/start.sh"
-      #entrypoint: "/bin/bash -c 'while true;do sleep 3600;done'"
     # Replace with your model
     ipc: host
