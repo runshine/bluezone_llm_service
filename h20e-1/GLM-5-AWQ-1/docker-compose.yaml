@@ -1,4 +1,4 @@
-name: "GLM-5-AWQ"
+name: "GLM-5-AWQ-1"
 services:
   vllm-glm-5-awq-1:
     image: vllm/vllm-openai:v0.18.1
