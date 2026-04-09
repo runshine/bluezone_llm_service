@@ -13,8 +13,8 @@ export VLLM_USE_V1=1
 #export PYTHONHASHSEED=0
 echo $CUDA_VISIBLE_DEVICES
 
-vllm serve /data/models/tclf90/GLM-5-AWQ \
-    --served-model-name 'zai-org/GLM-5' \
+vllm serve /data/models/GLM-5.1-w4a8 \
+    --served-model-name 'zai-org/GLM-5.1' \
     --max-num-seqs 64 \
     --max-model-len 202752 \
     --enable-chunked-prefill \
