@@ -1,7 +1,7 @@
 name: "GLM-5-AWQ-0"
 services:
   vllm-glm-5-awq-0:
-    image: vllm/vllm-openai:v0.18.1
+    image: vllm/vllm-openai:glm51
     runtime: nvidia
     deploy:
       resources:
@@ -16,6 +16,7 @@ services:
       - /data/models:/data/models:ro
       - ./start.sh:/data/start.sh:ro
       - ./glm4_mtp_fix.py:/data/glm4_mtp_fix.py:ro
+      - ./lmcache_config.yaml:/data/lmcache_config.yaml
     ports:
       - "8000:8000"
     restart: unless-stopped
