@@ -1,3 +1,5 @@
 chunk_size: 1024
 local_cpu: true
 max_local_cpu_size: 768
+remote_url: "lm://localhost:65432" # 远程缓存服务器的地址
+remote_serde: "cachegen"  # 远程序列化方式，如 cachegen 用于压缩

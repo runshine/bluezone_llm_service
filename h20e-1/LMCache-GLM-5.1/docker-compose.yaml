@@ -1,0 +1,12 @@
+name: "LMCache-GLM5.1"
+services:
+  lmcache:
+    image: vllm/vllm-openai:glm51
+    network_mode: host 
+    volumes:
+      - ./start.sh:/data/start.sh:ro
+    restart: unless-stopped
+    environment:
+      - TZ=Asia/Shanghai
+    entrypoint: "/data/start.sh"
+    ipc: host
