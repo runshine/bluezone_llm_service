@@ -1,6 +1,6 @@
 services:
   litellm:
-    image: litellm/litellm:v1.82.1-nightly
+    image: ghcr.io/berriai/litellm:1.84.0-dev.1
     #########################################
     ## Uncomment these lines to start proxy with a config.yaml file ##
     # volumes:
@@ -17,6 +17,11 @@ services:
       - .env # Load local .env file
     depends_on:
       - db  # Indicates that this service depends on the 'db' service, ensuring 'db' starts first
+    ulimits:
+      nproc: 65535
+      nofile:
+        soft: 36677
+        hard: 56677
     healthcheck:  # Defines the health check configuration for the container
       test:
         - CMD-SHELL
