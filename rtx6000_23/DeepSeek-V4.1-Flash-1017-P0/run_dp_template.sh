@@ -8,6 +8,7 @@ export FLASHINFER_CUDA_ARCH_LIST=12.0
 export VLLM_USE_V2_MODEL_RUNNER=1
 export CUDA_VISIBLE_DEVICES="0,1,2,3"
 export MOONCAKE_CONFIG_PATH=/opt/workspace/mooncake_config.json 
+export VLLM_MOONCAKE_BOOTSTRAP_PORT=9100
 echo "CUDA_VISIBLE_DEVICES=$CUDA_VISIBLE_DEVICES"
 
 pip install mooncake-transfer-engine-cuda13 
