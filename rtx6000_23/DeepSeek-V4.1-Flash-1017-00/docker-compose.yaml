@@ -1,0 +1,37 @@
+services:
+  DeepSeek-V4.1-Flash-1017-00:
+    image: ghcr.io/yhfgyyf/vllm-deepseek-v4-sm89:0.28.1rc1-vision11-sm89-sm120-cu130
+    entrypoint: ["/bin/bash", "/opt/run.sh"]
+    ports:
+      - "8000:8000"
+    volumes:
+      - /data/models:/data/models
+      - ./run.sh:/opt/run.sh
+
+    environment:
+      HF_HOME: /root/.cache/huggingface
+      HF_HUB_OFFLINE: "1"
+      PYTORCH_CUDA_ALLOC_CONF: expandable_segments:True
+      VLLM_PREFIX_CACHE_RETENTION_INTERVAL: "4096"
+      VIRTUAL_ENV: "/opt/venv"
+      
+    ipc: host
+    ulimits:
+      memlock: -1
+      stack: 67108864
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              device_ids: ["0", "1","2", "3"]
+              capabilities: [gpu]
+
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 10
+      start_period: 600s
+

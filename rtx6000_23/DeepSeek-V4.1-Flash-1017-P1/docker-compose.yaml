@@ -1,0 +1,33 @@
+services:
+  DeepSeek-V4.1-Flash-1017-P1:
+    image: ghcr.io/yhfgyyf/vllm-deepseek-v4-sm89:0.28.1rc1-vision11-sm89-sm120-cu130
+    #image: vllm/vllm-openai:cu134-nightly
+    entrypoint: ["/bin/bash", "/opt/workspace/run.sh"]
+    network_mode: host
+    volumes:
+      - /data/models:/data/models
+      - /data/bluezone_llm_service/rtx6000_23/DeepSeek-V4.1-Flash-1017-P1:/opt/workspace
+    privileged: true
+    environment:
+      HF_HOME: /root/.cache/huggingface
+      HF_HUB_OFFLINE: "1"
+      PYTORCH_CUDA_ALLOC_CONF: expandable_segments:True
+      VLLM_PREFIX_CACHE_RETENTION_INTERVAL: "4096"
+      VIRTUAL_ENV: "/opt/venv"
+    devices:
+      - /dev/infiniband
+    ipc: host
+    ulimits:
+      memlock: -1
+      stack: 67108864
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              device_ids: ["4","5","6","7"]
+              capabilities: [gpu]
+
+    restart: unless-stopped
+
+

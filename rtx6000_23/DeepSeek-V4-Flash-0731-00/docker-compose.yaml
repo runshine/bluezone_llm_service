@@ -41,6 +41,7 @@ services:
           --default-chat-template-kwargs.thinking=true \
           --default-chat-template-kwargs.reasoning_effort=high \
           --enable-flashinfer-autotune \
+          --enable-prompt-tokens-details \
           --speculative-config '{"method":"dspark","num_speculative_tokens":5}'
 
     ports:

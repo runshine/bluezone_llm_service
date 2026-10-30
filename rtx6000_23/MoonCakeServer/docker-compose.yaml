@@ -1,0 +1,24 @@
+services:
+  MoonCakeMaster:
+    image: ghcr.io/yhfgyyf/vllm-deepseek-v4-sm89:0.28.1rc1-vision11-sm89-sm120-cu130
+    #image: vllm/vllm-openai:cu134-nightly
+    entrypoint: ["/bin/bash", "/opt/workspace/run.sh"]
+    network_mode: host
+    volumes:
+      - /data/models:/data/models
+      - /data/bluezone_llm_service/rtx6000_23/MoonCakeServer:/opt/workspace
+    environment:
+      HF_HOME: /root/.cache/huggingface
+      HF_HUB_OFFLINE: "1"
+      PYTORCH_CUDA_ALLOC_CONF: expandable_segments:True
+      VLLM_PREFIX_CACHE_RETENTION_INTERVAL: "4096"
+      VIRTUAL_ENV: "/opt/venv"
+      
+    ipc: host
+    ulimits:
+      memlock: -1
+      stack: 67108864
+
+    restart: unless-stopped
+
+

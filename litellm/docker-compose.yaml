@@ -42,17 +42,17 @@ services:
     ports:
       - "5432:5432"
     volumes:
-      - postgres_data:/var/lib/postgresql/data # Persists Postgres data across container restarts
+      - /data/bluezone_llm_service/litellm/pg_data:/var/lib/postgresql/data # Persists Postgres data across container restarts
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -d litellm -U llmproxy"]
-      interval: 1s
+      interval: 30s
       timeout: 5s
       retries: 10
 
   prometheus:
     image: prom/prometheus
     volumes:
-      - prometheus_data:/prometheus
+      - /data/bluezone_llm_service/litellm/prometheus_data:/prometheus
       - ./prometheus.yml:/etc/prometheus/prometheus.yml
     ports:
       - "9090:9090"
@@ -61,9 +61,3 @@ services:
       - "--storage.tsdb.path=/prometheus"
       - "--storage.tsdb.retention.time=15d"
     restart: always
-
-volumes:
-  prometheus_data:
-    driver: local
-  postgres_data:
-    name: litellm_postgres_data # Named volume for Postgres data persistence
