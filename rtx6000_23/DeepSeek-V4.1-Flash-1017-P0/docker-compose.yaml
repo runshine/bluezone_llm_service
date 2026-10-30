@@ -16,7 +16,7 @@ services:
       VIRTUAL_ENV: "/opt/venv"
     devices:
       - /dev/infiniband
-    ipc: host
+    shm_size: "32g"
     ulimits:
       memlock: -1
       stack: 67108864
