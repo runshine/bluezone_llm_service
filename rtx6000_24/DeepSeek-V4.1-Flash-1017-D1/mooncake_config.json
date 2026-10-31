@@ -2,9 +2,9 @@
   "metadata_server": "http://172.31.29.23:8092/metadata",
   "master_server_address": "172.31.29.23:50063",
   "protocol": "rdma",
-  "device_name": "mlx5_4,mlx5_4",
+  "device_name": "mlx5_4",
   "mode": "embedded",
-  "global_segment_size": "128GB",
+  "global_segment_size": "80GB",
   "local_buffer_size": "4GB",
   "enable_offload": false
 }

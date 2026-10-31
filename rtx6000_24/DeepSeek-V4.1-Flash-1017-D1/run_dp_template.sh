@@ -3,14 +3,14 @@
 
 export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:False
 export GLOO_SOCKET_IFNAME="ens48f0"
-export TP_SOCKET_IFNAME="ens48f0"
+export TP_SOCKE T_IFNAME="ens48f0"
 export FLASHINFER_CUDA_ARCH_LIST=12.0
 export VLLM_USE_V2_MODEL_RUNNER=1
 export CUDA_VISIBLE_DEVICES="4,5,6,7"
 export MOONCAKE_CONFIG_PATH=/opt/workspace/mooncake_config.json 
 export VLLM_MOONCAKE_BOOTSTRAP_PORT=9101
 echo "CUDA_VISIBLE_DEVICES=$CUDA_VISIBLE_DEVICES"
-
+export PYTHONHASHSEED=0
 pip install mooncake-transfer-engine-cuda13 
 #pip install nixl
 
@@ -49,7 +49,7 @@ vllm serve /data/models/deepseek-ai/DeepSeek-V4.1-Flash-1017/ \
     "kv_connector": "MultiConnector",
     "kv_role": "kv_consumer",
     "kv_connector_extra_config": {
-      "device_name": "mlx5_2,mlx5_3",
+      "device_name": "mlx5_4",
       "connectors": [
         {
           "kv_connector": "MooncakeConnector",
