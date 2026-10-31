@@ -1,0 +1,150 @@
+{
+  "checked_at": "2026-10-16T16:06:57.595044+00:00",
+  "consistent": true,
+  "nodes": [
+    {
+      "role": "prefill",
+      "node": "http://192.168.128.159:6700",
+      "ok": true,
+      "models": [
+        "DeepSeekv4.1"
+      ],
+      "count": 218,
+      "max_model_len": 1048576,
+      "visual_tokens": 184,
+      "tokens_sha256": "9727e30db6b8f1591ecca546b5ada443fdafacd0f9b9098a48cef410edb74163"
+    },
+    {
+      "role": "prefill",
+      "node": "http://192.168.128.159:6701",
+      "ok": true,
+      "models": [
+        "DeepSeekv4.1"
+      ],
+      "count": 218,
+      "max_model_len": 1048576,
+      "visual_tokens": 184,
+      "tokens_sha256": "9727e30db6b8f1591ecca546b5ada443fdafacd0f9b9098a48cef410edb74163"
+    },
+    {
+      "role": "prefill",
+      "node": "http://192.168.128.159:6702",
+      "ok": true,
+      "models": [
+        "DeepSeekv4.1"
+      ],
+      "count": 218,
+      "max_model_len": 1048576,
+      "visual_tokens": 184,
+      "tokens_sha256": "9727e30db6b8f1591ecca546b5ada443fdafacd0f9b9098a48cef410edb74163"
+    },
+    {
+      "role": "prefill",
+      "node": "http://192.168.128.159:6703",
+      "ok": true,
+      "models": [
+        "DeepSeekv4.1"
+      ],
+      "count": 218,
+      "max_model_len": 1048576,
+      "visual_tokens": 184,
+      "tokens_sha256": "9727e30db6b8f1591ecca546b5ada443fdafacd0f9b9098a48cef410edb74163"
+    },
+    {
+      "role": "decode",
+      "node": "http://192.168.128.43:6721",
+      "ok": true,
+      "models": [
+        "DeepSeekv4.1"
+      ],
+      "count": 218,
+      "max_model_len": 1048576,
+      "visual_tokens": 184,
+      "tokens_sha256": "9727e30db6b8f1591ecca546b5ada443fdafacd0f9b9098a48cef410edb74163"
+    },
+    {
+      "role": "decode",
+      "node": "http://192.168.128.43:6722",
+      "ok": true,
+      "models": [
+        "DeepSeekv4.1"
+      ],
+      "count": 218,
+      "max_model_len": 1048576,
+      "visual_tokens": 184,
+      "tokens_sha256": "9727e30db6b8f1591ecca546b5ada443fdafacd0f9b9098a48cef410edb74163"
+    },
+    {
+      "role": "decode",
+      "node": "http://192.168.128.43:6723",
+      "ok": true,
+      "models": [
+        "DeepSeekv4.1"
+      ],
+      "count": 218,
+      "max_model_len": 1048576,
+      "visual_tokens": 184,
+      "tokens_sha256": "9727e30db6b8f1591ecca546b5ada443fdafacd0f9b9098a48cef410edb74163"
+    },
+    {
+      "role": "decode",
+      "node": "http://192.168.128.43:6724",
+      "ok": true,
+      "models": [
+        "DeepSeekv4.1"
+      ],
+      "count": 218,
+      "max_model_len": 1048576,
+      "visual_tokens": 184,
+      "tokens_sha256": "9727e30db6b8f1591ecca546b5ada443fdafacd0f9b9098a48cef410edb74163"
+    },
+    {
+      "role": "decode",
+      "node": "http://192.168.128.43:6725",
+      "ok": true,
+      "models": [
+        "DeepSeekv4.1"
+      ],
+      "count": 218,
+      "max_model_len": 1048576,
+      "visual_tokens": 184,
+      "tokens_sha256": "9727e30db6b8f1591ecca546b5ada443fdafacd0f9b9098a48cef410edb74163"
+    },
+    {
+      "role": "decode",
+      "node": "http://192.168.128.43:6726",
+      "ok": true,
+      "models": [
+        "DeepSeekv4.1"
+      ],
+      "count": 218,
+      "max_model_len": 1048576,
+      "visual_tokens": 184,
+      "tokens_sha256": "9727e30db6b8f1591ecca546b5ada443fdafacd0f9b9098a48cef410edb74163"
+    },
+    {
+      "role": "decode",
+      "node": "http://192.168.128.43:6727",
+      "ok": true,
+      "models": [
+        "DeepSeekv4.1"
+      ],
+      "count": 218,
+      "max_model_len": 1048576,
+      "visual_tokens": 184,
+      "tokens_sha256": "9727e30db6b8f1591ecca546b5ada443fdafacd0f9b9098a48cef410edb74163"
+    },
+    {
+      "role": "decode",
+      "node": "http://192.168.128.43:6728",
+      "ok": true,
+      "models": [
+        "DeepSeekv4.1"
+      ],
+      "count": 218,
+      "max_model_len": 1048576,
+      "visual_tokens": 184,
+      "tokens_sha256": "9727e30db6b8f1591ecca546b5ada443fdafacd0f9b9098a48cef410edb74163"
+    }
+  ]
+}

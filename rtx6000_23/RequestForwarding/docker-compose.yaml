@@ -1,0 +1,46 @@
+services:
+  vllm-forward:
+    container_name: DSv4.1-Flash-LoadBalance
+    image: dsv41-requestforwarding:exec-compat-v1
+    build:
+      context: .
+      dockerfile: Dockerfile.exec-compat
+    restart: unless-stopped
+    network_mode: "host"
+    shm_size: "32gb"
+    ulimits:
+      nofile:
+        soft: 262144
+        hard: 262144
+    working_dir: /nvme/Model/scripts
+    volumes:
+      - /data/bluezone_llm_service/rtx6000_23/RequestForwarding:/nvme/Model/scripts
+      - /data/models/deepseek-ai/DeepSeek-V4.1-Flash-1017/:/nvme/Model/weights:ro
+    environment:
+      TZ: Asia/Shanghai
+      RESPONSES_REDIS_URL: redis://127.0.0.1:6379/0
+      RESPONSES_STATE_TTL_SECONDS: "86400"
+      RESPONSES_KEY_PREFIX: "codex:responses:"
+      RESPONSES_DEFAULT_STORE: "true"
+      RESPONSES_WIRE_TRACE: "1"
+      RESPONSES_SSE_TRACE: "1"
+      RESPONSES_WIRE_TRACE_DIR: "/nvme/Model/scripts/trace"
+      REQUEST_AUDIT_TRACE: "1"
+      REQUEST_AUDIT_TRACE_DIR: "/nvme/Model/scripts/trace"
+      REQUEST_AUDIT_RETENTION_DAYS: "7"
+      REQUEST_AUDIT_MAX_BYTES: "214748364800"
+      REQUEST_AUDIT_PAYLOAD_MODE: "all"
+      REQUEST_AUDIT_SERVICE_ID: "loadbalance-8077"
+      REQUEST_AUDIT_LISTENER_PORT: "8077"
+      REQUEST_AUDIT_TIMEZONE: "Asia/Shanghai"
+      CHAT_STREAM_GUARD_ENABLED: "0"
+      CHAT_STREAM_GUARD_TRACE_ENABLED: "1"
+      CHAT_STREAM_GUARD_TRACE_MAX_BYTES: "52428800"
+      PREFILL_FAILURE_CAPTURE: "1"
+      PREFILL_FAILURE_CAPTURE_DIR: "/nvme/Model/scripts/failure-captures"
+      PREFILL_CONNECTION_MODE: "close"
+      PREFILL_MAX_CONNECTIONS: "32"
+      PREFILL_MAX_KEEPALIVE_CONNECTIONS: "0"
+      # Required for /instances/{add,remove}; inject this value at deploy time.
+      INSTANCE_API_KEY: "${INSTANCE_API_KEY:-}"
+    entrypoint: [./run.sh]

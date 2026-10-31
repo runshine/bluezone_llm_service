@@ -7,6 +7,7 @@ services:
     volumes:
       - /data/models:/data/models
       - /data/bluezone_llm_service/rtx6000_24/DeepSeek-V4.1-Flash-1017-D0:/opt/workspace
+      - /data/bluezone_llm_service/rtx6000_23/vllm-compat/multi_connector.py:/opt/venv/lib/python3.12/site-packages/vllm/distributed/kv_transfer/kv_connector/v1/multi_connector.py:ro
     privileged: true
     environment:
       HF_HOME: /root/.cache/huggingface

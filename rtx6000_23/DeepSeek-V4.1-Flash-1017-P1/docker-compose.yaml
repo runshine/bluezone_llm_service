@@ -4,18 +4,26 @@ services:
     #image: vllm/vllm-openai:cu134-nightly
     entrypoint: ["/bin/bash", "/opt/workspace/run.sh"]
     network_mode: host
+    ipc: private
     volumes:
-      - /data/models:/data/models
+      - /data/models:/data/models:ro
       - /data/bluezone_llm_service/rtx6000_23/DeepSeek-V4.1-Flash-1017-P1:/opt/workspace
-    privileged: true
+      - /data/bluezone_llm_service/rtx6000_23/vllm-compat/multi_connector.py:/opt/venv/lib/python3.12/site-packages/vllm/distributed/kv_transfer/kv_connector/v1/multi_connector.py:ro
     environment:
       HF_HOME: /root/.cache/huggingface
       HF_HUB_OFFLINE: "1"
       PYTORCH_CUDA_ALLOC_CONF: expandable_segments:True
       VLLM_PREFIX_CACHE_RETENTION_INTERVAL: "4096"
       VIRTUAL_ENV: "/opt/venv"
+      NVIDIA_VISIBLE_DEVICES: "4,5,6,7"
+    security_opt:
+      - seccomp:unconfined      # 解决 NUMA 系统调用被拦截的关键
     devices:
-      - /dev/infiniband
+      - /dev/infiniband/rdma_cm:/dev/infiniband/rdma_cm
+      - /dev/infiniband/uverbs4:/dev/infiniband/uverbs4
+      - /dev/infiniband/uverbs5:/dev/infiniband/uverbs5
+      - /dev/infiniband/umad4:/dev/infiniband/umad4
+      - /dev/infiniband/umad5:/dev/infiniband/umad5
     shm_size: "32g"
     ulimits:
       memlock: -1

@@ -1,0 +1,5 @@
+ARG PROXY_BASE_IMAGE=vllm/vllm-openai:latest
+FROM ${PROXY_BASE_IMAGE}
+COPY requirements.exec-compat.txt /opt/proxy-exec-compat/requirements.txt
+RUN python3 -m pip install -i https://pypi.tuna.tsinghua.edu.cn/simple --no-cache-dir --only-binary=:all: \
+    -r /opt/proxy-exec-compat/requirements.txt
