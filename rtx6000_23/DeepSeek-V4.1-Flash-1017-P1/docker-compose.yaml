@@ -10,6 +10,17 @@ services:
       - /data/bluezone_llm_service/rtx6000_23/DeepSeek-V4.1-Flash-1017-P1:/opt/workspace
       - /data/bluezone_llm_service/rtx6000_23/vllm-compat/multi_connector.py:/opt/venv/lib/python3.12/site-packages/vllm/distributed/kv_transfer/kv_connector/v1/multi_connector.py:ro
       - /data/bluezone_llm_service/rtx6000_23/vllm-compat/deepseek_v41.py:/opt/venv/lib/python3.12/site-packages/vllm/tokenizers/deepseek_v41.py:ro
+      - /data/bluezone_llm_service/rtx6000_23/vllm-compat/pr62400/vllm/v1/core/kv_cache_coordinator.py:/opt/venv/lib/python3.12/site-packages/vllm/v1/core/kv_cache_coordinator.py:ro
+      - /data/bluezone_llm_service/rtx6000_23/vllm-compat/pr62400/vllm/v1/core/kv_cache_manager.py:/opt/venv/lib/python3.12/site-packages/vllm/v1/core/kv_cache_manager.py:ro
+      - /data/bluezone_llm_service/rtx6000_23/vllm-compat/pr62400/vllm/v1/core/sched/scheduler.py:/opt/venv/lib/python3.12/site-packages/vllm/v1/core/sched/scheduler.py:ro
+      - /data/bluezone_llm_service/rtx6000_23/vllm-compat/pr62400/vllm/v1/core/single_type_kv_cache_manager.py:/opt/venv/lib/python3.12/site-packages/vllm/v1/core/single_type_kv_cache_manager.py:ro
+      - /data/bluezone_llm_service/rtx6000_23/vllm-compat/pr62400/vllm/v1/request.py:/opt/venv/lib/python3.12/site-packages/vllm/v1/request.py:ro
+      - /data/bluezone_llm_service/rtx6000_23/vllm-compat/pr62400/vllm/distributed/kv_transfer/kv_connector/v1/offloading/scheduler.py:/opt/venv/lib/python3.12/site-packages/vllm/distributed/kv_transfer/kv_connector/v1/offloading/scheduler.py:ro
+      - /data/bluezone_llm_service/rtx6000_23/vllm-compat/pr62400/vllm/distributed/kv_transfer/kv_connector/v1/mooncake/store/coordinator.py:/opt/venv/lib/python3.12/site-packages/vllm/distributed/kv_transfer/kv_connector/v1/mooncake/store/coordinator.py:ro
+      - /data/bluezone_llm_service/rtx6000_23/vllm-compat/pr62400/vllm/distributed/kv_transfer/kv_connector/v1/mooncake/store/data.py:/opt/venv/lib/python3.12/site-packages/vllm/distributed/kv_transfer/kv_connector/v1/mooncake/store/data.py:ro
+      - /data/bluezone_llm_service/rtx6000_23/vllm-compat/pr62400/vllm/distributed/kv_transfer/kv_connector/v1/mooncake/store/protocol.py:/opt/venv/lib/python3.12/site-packages/vllm/distributed/kv_transfer/kv_connector/v1/mooncake/store/protocol.py:ro
+      - /data/bluezone_llm_service/rtx6000_23/vllm-compat/pr62400/vllm/distributed/kv_transfer/kv_connector/v1/mooncake/store/scheduler.py:/opt/venv/lib/python3.12/site-packages/vllm/distributed/kv_transfer/kv_connector/v1/mooncake/store/scheduler.py:ro
+      - /data/bluezone_llm_service/rtx6000_23/vllm-compat/pr62400/vllm/distributed/kv_transfer/kv_connector/v1/mooncake/store/worker.py:/opt/venv/lib/python3.12/site-packages/vllm/distributed/kv_transfer/kv_connector/v1/mooncake/store/worker.py:ro
     environment:
       HF_HOME: /root/.cache/huggingface
       HF_HUB_OFFLINE: "1"
