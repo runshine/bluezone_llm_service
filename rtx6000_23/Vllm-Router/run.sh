@@ -14,4 +14,7 @@ vllm-router \
     --decode  http://172.31.29.24:7301 \
     --host 0.0.0.0 \
     --port 8077 \
-    --intra-node-data-parallel-size 16
+    # P0/P1 each launch with --dp-size 1; do not synthesize phantom @rank
+    # workers, otherwise consistent-hash can route requests to nonexistent
+    # prefill engines.
+    --intra-node-data-parallel-size 1

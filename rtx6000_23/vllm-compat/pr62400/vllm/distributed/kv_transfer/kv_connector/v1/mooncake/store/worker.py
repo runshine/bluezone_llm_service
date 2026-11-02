@@ -11,6 +11,7 @@ and MooncakeDistributedStore integration.
 """
 
 import dataclasses
+import os
 import json
 import math
 import os
@@ -750,7 +751,14 @@ class KVCacheStoreSendingThread(KVTransferThread):
         saved = self._saved_offset.get(req_meta.req_id, 0)
         puts: list[tuple[str, list[int], list[int], KeyMetadata]] = []
         for g_idx, db in enumerate(self.token_databases):
-            if not self.group_participates[g_idx]:
+            # Keep load eligibility identical to lookup/save.  Groups with a
+            # physical block smaller than the connector block are excluded by
+            # lookup and save, so asking Store for them here creates false
+            # hits followed by OBJECT_NOT_FOUND (-704).
+            if (
+                not self.group_participates[g_idx]
+                or db.block_size < self.block_size
+            ):
                 continue
             group_blocks = req_meta.block_ids[g_idx]
             # Distribute across ranks by the same rule as normal chunks.
@@ -1331,7 +1339,14 @@ class KVCacheStoreRecvingThread(KVTransferThread):
         key_list: list[str] = []
         block_id_list: list[int] = []
         for g_idx, db in enumerate(self.token_databases):
-            if not self.group_participates[g_idx]:
+            # Keep load eligibility identical to lookup/save.  Groups with a
+            # physical block smaller than the connector block are excluded by
+            # lookup and save, so asking Store for them here creates false
+            # hits followed by OBJECT_NOT_FOUND (-704).
+            if (
+                not self.group_participates[g_idx]
+                or db.block_size < self.block_size
+            ):
                 continue
             mask = load_mask_per_group[g_idx]
             chunks: list[tuple[int, int]] = []
@@ -1687,6 +1702,12 @@ class MooncakeStoreWorker:
             and callable(getattr(spec_cfg, "use_eagle_block_drop", None))
             else False
         )
+        # #61589 adds a proof token to every request block hash.  The core
+        # scheduler consequently disables the legacy EAGLE trailing-block
+        # drop; Store lookup must use the same policy or a valid lookup is
+        # reduced back to a zero-length external hit.
+        if os.environ.get("VLLM_MOONCAKE_LOOKAHEAD_HASHES"):
+            use_eagle_block_drop = False
         self.coord = MooncakeStoreCoordinator(
             self._kv_cache_groups,
             scheduler_block_size=self.block_size,
@@ -2153,7 +2174,10 @@ class MooncakeStoreWorker:
         # candidate_meta stores the (group, hash_bytes) for key slice.
         candidate_keys: list[str] = []
         candidate_meta: list[tuple[int, bytes]] = []
-        fine_grained = False
+        # Keep Store key generation at the same hash granularity used by the
+        # coordinator.  Mixed KV models with an aligned Mamba group enable
+        # partial hash hits (for example with --prefix-match-unit 8).
+        fine_grained = self.coord.enable_partial_hash_hits
         lookup_masks = None if fine_grained else self.coord.lookup_mask(token_len)
         for g_idx, db in enumerate(self.token_dbs):
             if (
@@ -2231,10 +2255,27 @@ class MooncakeStoreWorker:
             self.hash_block_size,
             exists_set,
         )
+        lookup_group_ids = {
+            g_idx
+            for g_idx, db in enumerate(self.token_dbs)
+            if self._kv_cache_groups[g_idx].kv_cache_spec.participates_in_prefix_caching
+            and db.block_size >= self.block_size
+        }
         _, hit_length, junctions = self.coord.find_longest_cache_hit(
             block_hashes,
             token_len,
             cached_block_pool,
+            active_group_ids=lookup_group_ids,
+        )
+        logger.info(
+            "Mooncake Store lookup diagnosis: token_len=%d candidate_keys=%d "
+            "candidate_blocks=%d existing_blocks=%d hit_length=%d junctions=%s",
+            token_len,
+            len(candidate_keys),
+            len(candidate_meta),
+            len(exists_set),
+            hit_length,
+            junctions,
         )
         if hit_length >= num_tokens:
             usable_length = self.coord.align_lookup_length(num_tokens - 1)
@@ -2244,6 +2285,7 @@ class MooncakeStoreWorker:
                 block_hashes,
                 usable_length,
                 cached_block_pool,
+            active_group_ids=lookup_group_ids,
             )
         return MooncakeLookupResult(
             hit_length,
@@ -2251,6 +2293,7 @@ class MooncakeStoreWorker:
                 block_hashes,
                 hit_length,
                 cached_block_pool,
+                active_group_ids=lookup_group_ids,
             ),
             junctions,
         )
@@ -2260,6 +2303,7 @@ class MooncakeStoreWorker:
         block_hashes: Sequence[BlockHash],
         hit_length: int,
         cached_block_pool: ExternalCachedBlockPool,
+        active_group_ids: set[int] | None = None,
     ) -> tuple[TailKeyBoundary, ...]:
         """Return the hash boundary used to store each group's tail block.
 
@@ -2274,6 +2318,8 @@ class MooncakeStoreWorker:
         boundaries = []
         hit_boundary_hash_idx = hit_length // self.hash_block_size - 1
         for group_id, db in enumerate(self.token_dbs):
+            if active_group_ids is not None and group_id not in active_group_ids:
+                continue
             chunk_id = cdiv(hit_length, db.block_size) - 1
             boundary_tokens = hit_length
             contains_hit_boundary = cached_block_pool.contains(

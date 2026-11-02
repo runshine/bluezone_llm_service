@@ -6,6 +6,10 @@ export CUDA_HOME=/usr/local/cuda-13.0
 export PATH="$CUDA_HOME/bin:$PATH"
 export VIRTUAL_ENV=/opt/venv
 
+# #61589 compatibility: hash one proof token past each prefix block.
+export VLLM_MOONCAKE_LOOKAHEAD_HASHES=1
+python3 /opt/workspace/pr61589_runtime_patch.py
+
 # The bundled vLLM build has a mixed-KV-cache compatibility mismatch: the
 # hybrid cache path passes allow_prefix_caching when promoting MLA specs.
 VLLM_KV_SPEC=/opt/venv/lib/python3.12/site-packages/vllm/v1/kv_cache_interface.py

@@ -750,7 +750,14 @@ class KVCacheStoreSendingThread(KVTransferThread):
         saved = self._saved_offset.get(req_meta.req_id, 0)
         puts: list[tuple[str, list[int], list[int], KeyMetadata]] = []
         for g_idx, db in enumerate(self.token_databases):
-            if not self.group_participates[g_idx]:
+            # Keep load eligibility identical to lookup/save.  Groups with a
+            # physical block smaller than the connector block are excluded by
+            # lookup and save, so asking Store for them here creates false
+            # hits followed by OBJECT_NOT_FOUND (-704).
+            if (
+                not self.group_participates[g_idx]
+                or db.block_size < self.block_size
+            ):
                 continue
             group_blocks = req_meta.block_ids[g_idx]
             # Distribute across ranks by the same rule as normal chunks.

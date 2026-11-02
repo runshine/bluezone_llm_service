@@ -30,7 +30,6 @@ vllm serve /data/models/deepseek-ai/DeepSeek-V4.1-Flash-1017/ \
     --max-model-len 1048576 \
     --max-num-batched-tokens 8192 \
     --max-num-seqs 16 \
-    --disable-hybrid-kv-cache-manager \
     --load-format safetensors \
     --speculative-config \
      '{"method":"dspark","num_speculative_tokens":5,"draft_sample_method":"probabilistic","rejection_sample_method":"block","enable_adaptive_verification":true}' \

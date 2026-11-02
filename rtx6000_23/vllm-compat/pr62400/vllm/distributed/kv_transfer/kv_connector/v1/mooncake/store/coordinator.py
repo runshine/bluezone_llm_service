@@ -159,6 +159,7 @@ class MooncakeStoreCoordinator:
         cached_block_pool: ExternalCachedBlockPool,
         *,
         apply_eagle: bool = True,
+        active_group_ids: set[int] | None = None,
     ) -> tuple[tuple[list[bool], ...], int, tuple[int, ...]]:
         """Returns ``(load_mask_per_group, hit_length, shared_prefix_boundaries)``.
         ``mask[g][i]`` is True iff group ``g`` populates chunk ``i`` locally
@@ -173,7 +174,11 @@ class MooncakeStoreCoordinator:
         leave the trailing block unloaded.
         """
         blocks_per_group, hit_length, longest_hit = self._find_hit_blocks(
-            block_hashes, max_length, cached_block_pool, apply_eagle=apply_eagle
+            block_hashes,
+            max_length,
+            cached_block_pool,
+            apply_eagle=apply_eagle,
+            active_group_ids=active_group_ids,
         )
         masks = tuple(
             [blk is not cached_block_pool.null_block for blk in blocks]
@@ -336,6 +341,7 @@ class MooncakeStoreCoordinator:
         cached_block_pool: ExternalCachedBlockPool,
         *,
         apply_eagle: bool = True,
+        active_group_ids: set[int] | None = None,
     ) -> tuple[tuple[list[KVCacheBlock], ...], int, int]:
         """Mirrors HybridKVCacheCoordinator.find_longest_cache_hit but
         dispatches via spec_manager_map (we don't allocate managers).
@@ -352,8 +358,27 @@ class MooncakeStoreCoordinator:
             if self.enable_partial_hash_hits
             else self.lcm_block_size
         )
-        if len(self.attention_groups) == 1:
-            spec, group_ids, manager_cls, group_eagle = self.attention_groups[0]
+        attention_groups = self.attention_groups
+        if active_group_ids is not None:
+            # Store lookup may intentionally omit KV groups whose physical
+            # block layout cannot be persisted by this connector.  Those
+            # groups must not turn an otherwise valid Store hit into a
+            # zero-length common hit; they are computed locally after the
+            # external groups are loaded.
+            attention_groups = tuple(
+                group._replace(
+                    group_ids=[gid for gid in group.group_ids if gid in active_group_ids]
+                )
+                for group in self.attention_groups
+            )
+            attention_groups = tuple(
+                group for group in attention_groups if group.group_ids
+            )
+            if not attention_groups:
+                return tuple([] for _ in self.kv_cache_groups), 0, 0
+
+        if len(attention_groups) == 1:
+            spec, group_ids, manager_cls, group_eagle = attention_groups[0]
             hit_blocks, hit_length = manager_cls.find_longest_cache_hit(
                 block_hashes=block_hashes,  # type: ignore[arg-type]
                 max_length=max_length,
@@ -384,7 +409,7 @@ class MooncakeStoreCoordinator:
             curr_hit_length = hit_length
 
             for idx, (spec, group_ids, manager_cls, group_eagle) in enumerate(
-                self.attention_groups
+                attention_groups
             ):
                 first_group_id = group_ids[0]
                 cached = hit_blocks_by_group[first_group_id]
@@ -439,7 +464,7 @@ class MooncakeStoreCoordinator:
         # Truncate full-attention hit_blocks to final converged length;
         # other specs already trim themselves inside their hit logic. cdiv keeps
         # the partial tail block when hit_length is not block-aligned.
-        for group in self.attention_groups:
+        for group in attention_groups:
             if not isinstance(group.spec, FullAttentionSpec):
                 continue
             num_blocks = cdiv(hit_length, group.spec.block_size)

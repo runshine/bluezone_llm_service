@@ -21,11 +21,13 @@ services:
       - /data/bluezone_llm_service/rtx6000_23/vllm-compat/pr62400/vllm/distributed/kv_transfer/kv_connector/v1/mooncake/store/protocol.py:/opt/venv/lib/python3.12/site-packages/vllm/distributed/kv_transfer/kv_connector/v1/mooncake/store/protocol.py:ro
       - /data/bluezone_llm_service/rtx6000_23/vllm-compat/pr62400/vllm/distributed/kv_transfer/kv_connector/v1/mooncake/store/scheduler.py:/opt/venv/lib/python3.12/site-packages/vllm/distributed/kv_transfer/kv_connector/v1/mooncake/store/scheduler.py:ro
       - /data/bluezone_llm_service/rtx6000_23/vllm-compat/pr62400/vllm/distributed/kv_transfer/kv_connector/v1/mooncake/store/worker.py:/opt/venv/lib/python3.12/site-packages/vllm/distributed/kv_transfer/kv_connector/v1/mooncake/store/worker.py:ro
+      - /data0/bluezone_llm_service/rtx6000_23/vllm-compat/pr62400/pr61589_runtime_patch.py:/opt/workspace/pr61589_runtime_patch.py:ro
     environment:
       HF_HOME: /root/.cache/huggingface
       HF_HUB_OFFLINE: "1"
       PYTORCH_CUDA_ALLOC_CONF: expandable_segments:True
       VLLM_PREFIX_CACHE_RETENTION_INTERVAL: "4096"
+      VLLM_SERVER_DEV_MODE: "1"
       VIRTUAL_ENV: "/opt/venv"
       NVIDIA_VISIBLE_DEVICES: "4,5,6,7"
     security_opt:
