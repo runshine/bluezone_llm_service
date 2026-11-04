@@ -1,6 +1,7 @@
 # SPDX-License-Identifier: Apache-2.0
 # SPDX-FileCopyrightText: Copyright contributors to the vLLM project
 import itertools
+import os
 import time
 from collections import defaultdict, deque
 from collections.abc import Iterable
@@ -352,6 +353,10 @@ class Scheduler(SchedulerInterface):
                     else 1
                 )
             self.use_eagle_block_drop = speculative_config.use_eagle_block_drop()
+            # #61589 lookahead hashes prove the tail token, so the external
+            # Store lookup must not drop the proven EAGLE block again.
+            if os.getenv("VLLM_MOONCAKE_LOOKAHEAD_HASHES") == "1":
+                self.use_eagle_block_drop = False
             if self.use_eagle and not self.use_eagle_block_drop:
                 logger.warning(
                     "EAGLE trailing prefix-cache block dropping is disabled. "
@@ -3273,8 +3278,11 @@ class Scheduler(SchedulerInterface):
             is_affected = False
             marked_invalid_block = False
             req_id = request.request_id
-            # TODO (davidb): add support for hybrid memory allocator
-            (req_block_ids,) = self.kv_cache_manager.get_block_ids(req_id)
+            # A request can have one block-id list per KV cache group.  The
+            # Store connector is allowed to load more than one group (for
+            # example DeepSeek's mixed KV layout), so do not unpack this
+            # tuple as if the old single-group layout were still guaranteed.
+            req_block_ids_by_group = self.kv_cache_manager.get_block_ids(req_id)
             # We iterate only over blocks that may contain externally computed
             # tokens
             req_num_computed_tokens = (
@@ -3284,39 +3292,42 @@ class Scheduler(SchedulerInterface):
             req_num_computed_blocks = (
                 req_num_computed_tokens + self.block_size - 1
             ) // self.block_size
-            for idx, block_id in zip(range(req_num_computed_blocks), req_block_ids):
-                if block_id not in invalid_block_ids:
-                    continue
+            for req_block_ids in req_block_ids_by_group:
+                for idx, block_id in zip(
+                    range(req_num_computed_blocks), req_block_ids
+                ):
+                    if block_id not in invalid_block_ids:
+                        continue
 
-                is_affected = True
+                    is_affected = True
 
-                if block_id in marked_invalid_block_ids:
-                    # This invalid block is shared with a previous request
-                    # and was already marked for recomputation.
-                    # This means this request can still consider this block
-                    # as computed when rescheduled.
-                    # Currently this only applies to sync loading; Async
-                    # loading does not yet support block sharing
-                    continue
+                    if block_id in marked_invalid_block_ids:
+                        # This invalid block is shared with a previous request
+                        # and was already marked for recomputation.
+                        # This means this request can still consider this block
+                        # as computed when rescheduled.
+                        # Currently this only applies to sync loading; Async
+                        # loading does not yet support block sharing
+                        continue
 
-                marked_invalid_block_ids.add(block_id)
+                    marked_invalid_block_ids.add(block_id)
 
-                if marked_invalid_block:
-                    # This request has already marked an invalid block for
-                    # recomputation and updated its num_computed_tokens.
-                    continue
+                    if marked_invalid_block:
+                        # This request has already marked an invalid block for
+                        # recomputation and updated its num_computed_tokens.
+                        continue
 
-                marked_invalid_block = True
-                # Truncate the computed tokens at the first failed block
-                request.num_computed_tokens = idx * self.block_size
-                num_affected_tokens = (
-                    req_num_computed_tokens - request.num_computed_tokens
-                )
-                total_affected_tokens += num_affected_tokens
+                    marked_invalid_block = True
+                    # Truncate the computed tokens at the first failed block
+                    request.num_computed_tokens = idx * self.block_size
+                    num_affected_tokens = (
+                        req_num_computed_tokens - request.num_computed_tokens
+                    )
+                    total_affected_tokens += num_affected_tokens
 
-                # collect invalid block and all downstream dependent blocks
-                if evict_blocks:
-                    blocks_to_evict.update(req_block_ids[idx:])
+                    # collect invalid block and all downstream dependent blocks
+                    if evict_blocks:
+                        blocks_to_evict.update(req_block_ids[idx:])
 
             if is_affected:
                 if not marked_invalid_block:

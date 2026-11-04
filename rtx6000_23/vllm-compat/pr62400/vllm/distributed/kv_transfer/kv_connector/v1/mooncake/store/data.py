@@ -6,7 +6,7 @@
 """Data classes for MooncakeStoreConnector."""
 
 from collections.abc import Iterable, Sequence
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 from typing import cast
 
 import numpy as np
@@ -19,6 +19,7 @@ from vllm.distributed.kv_transfer.kv_connector.v1.base import (
 from vllm.logger import init_logger
 from vllm.utils.math_utils import cdiv
 from vllm.utils.torch_utils import is_non_overlapping_and_dense
+from vllm.v1.attention.backends.utils import NULL_BLOCK_ID
 from vllm.v1.core.kv_cache_utils import (
     BlockHash,
     BlockHashListWithBlockSize,
@@ -235,6 +236,7 @@ class RankLocalStoreLayout(StoreLayout):
         self._key_prefix = PoolKey.build_prefix(metadata)
         self.kv_caches_base_addr: list[int] = []
         self.block_len: list[int] = []
+        self.block_stride: list[int] = []
 
     @property
     def local_shard_ids(self) -> tuple[StoreShardId, ...]:
@@ -264,6 +266,7 @@ class RankLocalStoreLayout(StoreLayout):
 
     def set_block_len(self, block_lens: list[int]) -> None:
         self.block_len = block_lens
+        self.block_stride = list(block_lens)
 
     def register_kv_caches(
         self,
@@ -271,12 +274,11 @@ class RankLocalStoreLayout(StoreLayout):
         num_blocks: int,
     ) -> None:
         seen_region_ptrs: set[int] = set()
+        self.num_blocks = num_blocks
         base_addrs: list[int] = []
         block_lens: list[int] = []
+        block_strides: list[int] = []
         for cache in kv_caches:
-            storage = cache.untyped_storage()
-            storage_addr = storage.data_ptr()
-            storage_len = storage.nbytes()
             if not is_non_overlapping_and_dense(cache[0]):
                 for head_idx in range(cache.shape[1]):
                     head_cache = cache[:, head_idx]
@@ -286,22 +288,19 @@ class RankLocalStoreLayout(StoreLayout):
                         continue
                     seen_region_ptrs.add(region_addr)
                     base_addrs.append(region_addr)
-                    block_lens.append(head_cache.stride(0) * head_cache.element_size())
-            elif cache.stride(0) * cache.element_size() * num_blocks == storage_len:
-                if storage_addr in seen_region_ptrs:
-                    continue
-                seen_region_ptrs.add(storage_addr)
-                base_addrs.append(storage_addr)
-                block_lens.append(storage_len // num_blocks)
+                    block_strides.append(head_cache.stride(0) * head_cache.element_size())
+                    block_lens.append(head_cache[0].numel() * head_cache.element_size())
             else:
                 region_addr = cache.data_ptr()
                 if region_addr in seen_region_ptrs:
                     continue
                 seen_region_ptrs.add(region_addr)
                 base_addrs.append(region_addr)
-                block_lens.append(cache.stride(0) * cache.element_size())
+                block_strides.append(cache.stride(0) * cache.element_size())
+                block_lens.append(cache[0].numel() * cache.element_size())
         self.kv_caches_base_addr = base_addrs
         self.block_len = block_lens
+        self.block_stride = block_strides
 
     def prepare_values(
         self,
@@ -324,12 +323,19 @@ class RankLocalStoreLayout(StoreLayout):
         starts = np.fromiter((c[0] for c in chunks), dtype=np.int64, count=n)
         spans = np.fromiter((c[1] for c in chunks), dtype=np.int64, count=n) - starts
         assert np.all(spans % self.hash_block_size == 0)
+        if (not length or np.any(starts < 0)
+                or np.any(starts % self.block_size != 0)
+                or np.any(spans <= 0) or np.any(spans > self.block_size)):
+            raise ValueError("Invalid Store chunk or unregistered group layout")
         bids = np.fromiter(
             (block_ids[i] for i in (starts // self.block_size).tolist()),
             dtype=np.int64,
             count=n,
         )
-        addrs = base[None, :] + bids[:, None] * blen[None, :]
+        if np.any(bids == NULL_BLOCK_ID) or np.any(bids < 0) or np.any(bids >= self.num_blocks):
+            raise ValueError("Invalid Store destination/source block ID")
+        stride = np.asarray(self.block_stride, dtype=np.int64)
+        addrs = base[None, :] + bids[:, None] * stride[None, :]
         block_counts = (spans + self.block_size - 1) // self.block_size
         sizes = blen[None, :] * block_counts[:, None]
         return addrs.tolist(), sizes.tolist(), bids.tolist()
@@ -338,7 +344,7 @@ class RankLocalStoreLayout(StoreLayout):
         length = len(self.block_len)
         return (
             [
-                base_addr + block_id * self.block_len[index % length]
+                base_addr + block_id * self.block_stride[index % length]
                 for index, base_addr in enumerate(self.kv_caches_base_addr)
             ],
             [
@@ -821,10 +827,10 @@ class ReqMeta:
         return ReqMeta(
             req_id=tracker.req_id,
             token_len_chunk=num_tokens_to_save,
-            block_ids=tracker.allocated_block_ids,
+            block_ids=tuple(list(group) for group in tracker.allocated_block_ids),
             can_save=not skip_save,
-            load_spec=load_spec,
-            block_hashes=block_hashes,
+            load_spec=replace(load_spec) if load_spec is not None else None,
+            block_hashes=list(block_hashes),
             token_ids=token_ids,
             token_ids_start=token_ids_start,
             num_prompt_tokens=tracker.prefill_end_tokens,

@@ -3,7 +3,7 @@
 
 export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:False
 export GLOO_SOCKET_IFNAME="ens48f0"
-export TP_SOCKE T_IFNAME="ens48f0"
+export TP_SOCKET_IFNAME="ens48f0"
 export FLASHINFER_CUDA_ARCH_LIST=12.0
 export VLLM_USE_V2_MODEL_RUNNER=1
 export CUDA_VISIBLE_DEVICES="4,5,6,7"
@@ -30,7 +30,6 @@ vllm serve /data/models/deepseek-ai/DeepSeek-V4.1-Flash-1017/ \
     --max-model-len 1048576 \
     --max-num-batched-tokens 8192 \
     --max-num-seqs 16 \
-    --disable-hybrid-kv-cache-manager \
     --load-format safetensors \
     --speculative-config \
      '{"method":"dspark","num_speculative_tokens":5,"draft_sample_method":"probabilistic","rejection_sample_method":"block","enable_adaptive_verification":true}' \
@@ -57,7 +56,10 @@ vllm serve /data/models/deepseek-ai/DeepSeek-V4.1-Flash-1017/ \
         },
         {
           "kv_connector": "MooncakeStoreConnector",
-          "kv_role": "kv_consumer"
+          "kv_role": "kv_consumer",
+          "kv_connector_extra_config": {
+            "enable_mixed_group_store": true
+          }
         }
       ]
     }
