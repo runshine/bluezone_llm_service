@@ -362,9 +362,12 @@ class MooncakeStoreCoordinator:
         if active_group_ids is not None:
             # Store lookup may intentionally omit KV groups whose physical
             # block layout cannot be persisted by this connector.  Those
-            # groups must not turn an otherwise valid Store hit into a
-            # zero-length common hit; they are computed locally after the
-            # external groups are loaded.
+            # Callers using a subset must separately guarantee the omitted
+            # prefix-cacheable groups are valid at the returned boundary.
+            # The scheduler has one computed-token count, not independent
+            # per-group replay cursors. Worker lookup therefore rejects layouts
+            # whose save/load paths omit a required group; merely filtering
+            # it here does not cause that group's prefix to be recomputed.
             attention_groups = tuple(
                 group._replace(
                     group_ids=[gid for gid in group.group_ids if gid in active_group_ids]

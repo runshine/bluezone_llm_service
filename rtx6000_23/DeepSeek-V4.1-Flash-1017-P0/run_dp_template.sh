@@ -56,7 +56,10 @@ vllm serve /data/models/deepseek-ai/DeepSeek-V4.1-Flash-1017/ \
         },
         {
           "kv_connector": "MooncakeStoreConnector",
-          "kv_role": "kv_both"
+          "kv_role": "kv_both",
+          "kv_connector_extra_config": {
+            "enable_mixed_group_store": true
+          }
         }
       ]
     }

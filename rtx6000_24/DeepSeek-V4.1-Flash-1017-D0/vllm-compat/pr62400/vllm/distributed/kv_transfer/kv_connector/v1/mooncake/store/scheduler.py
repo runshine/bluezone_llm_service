@@ -434,7 +434,17 @@ class MooncakeStoreScheduler:
         meta: MooncakeStoreConnectorMetadata,
         scheduler_output: SchedulerOutput,
     ) -> None:
-        """Replace append-only mirrors with the core's current block tables."""
+        """Freeze async save/load block tables and refresh save mirrors.
+
+        Both Store puts and gets run after this scheduler step.  A
+        ReqMeta.block_ids value originally points at a mutable request tracker
+        table; the core may append, CoW, clear, or recycle those lists before
+        the worker consumes the metadata.  Saving only a snapshot is
+        insufficient: a load can then DMA into a different request's block.
+        """
+        for req_meta in meta.requests:
+            req_meta.block_ids = tuple(list(group) for group in req_meta.block_ids)
+
         save_metas = [req_meta for req_meta in meta.requests if req_meta.can_save]
         if not save_metas:
             return
@@ -445,10 +455,29 @@ class MooncakeStoreScheduler:
         )
         for req_meta in save_metas:
             block_ids = block_state.block_ids.get(req_meta.req_id)
-            assert block_ids is not None, (
-                f"Missing current block table for store request {req_meta.req_id}"
+            if block_ids is None:
+                # A request can remain in the connector's append-only state
+                # while the core omits it from this step's block snapshot
+                # (for example while an async store lookup is being handed
+                # back or the request is being finalized).  Its mirrored
+                # block ids are no longer safe to DMA from: they may already
+                # have been recycled for another request.  Keep a load, if
+                # present, but skip this save and let a later scheduled step
+                # rebuild the metadata from a fresh core snapshot.
+                tracker = self._request_trackers.get(req_meta.req_id)
+                if tracker is not None:
+                    tracker.num_saved_tokens = req_meta.token_ids_start
+                req_meta.can_save = False
+                continue
+            # ReqMeta is consumed by an asynchronous worker after this
+            # scheduler step.  Do not retain the scheduler's mutable block
+            # table: the core may update a group list in place when blocks are
+            # appended, copied-on-write, or recycled for another request.
+            # Keeping that alias lets a valid hash be paired with a later
+            # request's physical KV payload.
+            req_meta.block_ids = tuple(
+                list(group) for group in self.kv_cache_config.select_transfer_block_ids(block_ids)
             )
-            req_meta.block_ids = block_ids
 
     def _reference_save_blocks(self, meta: MooncakeStoreConnectorMetadata) -> None:
         """Take a GPU block reference for every store job this step emits.

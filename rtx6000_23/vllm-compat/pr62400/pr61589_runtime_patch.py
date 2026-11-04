@@ -53,7 +53,11 @@ def patch_runtime(root: Path) -> None:
         new = (
             "            # bluezone pr61589 lookahead\n"
             "            self.request_block_hasher = get_request_block_hasher(\n"
-            "                hash_block_size, caching_hash_fn, 1\n"
+            "                hash_block_size, caching_hash_fn, int(\n"
+            "                    __import__('os').getenv(\n"
+            "                        'VLLM_MOONCAKE_LOOKAHEAD_HASHES', '1'\n"
+            "                    ) == '1'\n"
+            "                )\n"
             "            )\n"
         )
         if old not in engine:
