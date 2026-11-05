@@ -1,0 +1,23 @@
+ERROR 11-04 15:25:49 [worker.py:1331] Mooncake Store load rejected for request bad_load
+ERROR 11-04 15:25:49 [worker.py:1331] Traceback (most recent call last):
+ERROR 11-04 15:25:49 [worker.py:1331]   File "/opt/venv/lib/python3.12/site-packages/vllm/distributed/kv_transfer/kv_connector/v1/mooncake/store/worker.py", line 1325, in _handle_request
+ERROR 11-04 15:25:49 [worker.py:1331]     self._load_request(req_meta)
+ERROR 11-04 15:25:49 [worker.py:1331]   File "/usr/lib/python3.12/unittest/mock.py", line 1134, in __call__
+ERROR 11-04 15:25:49 [worker.py:1331]     return self._mock_call(*args, **kwargs)
+ERROR 11-04 15:25:49 [worker.py:1331]            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ERROR 11-04 15:25:49 [worker.py:1331]   File "/usr/lib/python3.12/unittest/mock.py", line 1138, in _mock_call
+ERROR 11-04 15:25:49 [worker.py:1331]     return self._execute_mock_call(*args, **kwargs)
+ERROR 11-04 15:25:49 [worker.py:1331]            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ERROR 11-04 15:25:49 [worker.py:1331]   File "/usr/lib/python3.12/unittest/mock.py", line 1193, in _execute_mock_call
+ERROR 11-04 15:25:49 [worker.py:1331]     raise effect
+ERROR 11-04 15:25:49 [worker.py:1331] ValueError: bad mapping
+WARNING 11-04 15:25:49 [worker.py:2214] Disabling Mooncake Store prefix reads: prefix-cacheable groups (1,) have blocks smaller than scheduler block_size=128 and are omitted by Store save/load. Refusing partial-group hits; local prefix caching and P/D transfer remain enabled.
+{"hash_size": 8, "all_groups_reconciled_hit": 0, "worker_reported_hit": 0, "unsafe_partial_group_hit": 512, "missing_prefix_cacheable_group": 1}
+WARNING 11-04 15:25:49 [worker.py:2214] Disabling Mooncake Store prefix reads: prefix-cacheable groups (1,) have blocks smaller than scheduler block_size=128 and are omitted by Store save/load. Refusing partial-group hits; local prefix caching and P/D transfer remain enabled.
+{"hash_size": 32, "all_groups_reconciled_hit": 0, "worker_reported_hit": 0, "unsafe_partial_group_hit": 512, "missing_prefix_cacheable_group": 1}
+W1104 15:25:48.289000 79 torch/utils/cpp_extension.py:178] No CUDA runtime is found, using CUDA_HOME='/usr/local/cuda'
+............
+----------------------------------------------------------------------
+Ran 12 tests in 0.023s
+
+OK

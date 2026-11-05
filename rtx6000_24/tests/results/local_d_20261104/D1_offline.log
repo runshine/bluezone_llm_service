@@ -1,0 +1,3 @@
+docker: Error response from daemon: failed to create task for container: failed to create shim task: OCI runtime create failed: runc create failed: unable to start container process: error during container init: error mounting "/data/bluezone_llm_service/rtx6000_24/vllm-compat/pr61589_runtime_patch.py" to rootfs at "/opt/workspace/pr61589_runtime_patch.py": create mountpoint for /opt/workspace/pr61589_runtime_patch.py mount: make mountpoint "/opt/workspace/pr61589_runtime_patch.py": read-only file system
+
+Run 'docker run --help' for more information

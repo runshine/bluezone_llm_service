@@ -41,7 +41,7 @@ vllm serve /data/models/deepseek-ai/DeepSeek-V4.1-Flash-1017/ \
     --tool-call-parser deepseek_v41 \
     --enable-auto-tool-choice \
     --safetensors-load-strategy lazy \
-    --gpu-memory-utilization 0.9 \
+    --gpu-memory-utilization 0.93 \
     --hf-overrides '{"ced_prefill":false}' \
     --compilation-config '{"cudagraph_mode":"FULL"}'\
     --kv-transfer-config '{

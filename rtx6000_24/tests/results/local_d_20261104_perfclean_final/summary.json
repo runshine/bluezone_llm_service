@@ -1,0 +1,24 @@
+{
+  "checked_at": "2026-11-04T21:33:02.419496+08:00",
+  "scope": "local files and disposable CPU-only containers; no live service or remote changes",
+  "results": {
+    "D0": {
+      "exit_code": 0,
+      "log": "/data0/bluezone_llm_service/rtx6000_24/tests/results/local_d_20261104_perfclean_final/D0_offline.log",
+      "image": "ghcr.io/yhfgyyf/vllm-deepseek-v4-sm89:0.28.1rc1-vision11-sm89-sm120-cu130",
+      "network": "none",
+      "gpu_access": false,
+      "mounts_checked": 16
+    },
+    "D1": {
+      "exit_code": 0,
+      "log": "/data0/bluezone_llm_service/rtx6000_24/tests/results/local_d_20261104_perfclean_final/D1_offline.log",
+      "image": "ghcr.io/yhfgyyf/vllm-deepseek-v4-sm89:0.28.1rc1-vision11-sm89-sm120-cu130",
+      "network": "none",
+      "gpu_access": false,
+      "mounts_checked": 16
+    }
+  },
+  "file_count": 31,
+  "passed": true
+}
