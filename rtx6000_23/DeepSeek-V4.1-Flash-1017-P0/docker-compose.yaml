@@ -31,6 +31,7 @@ services:
       VIRTUAL_ENV: "/opt/venv"
       NVIDIA_VISIBLE_DEVICES: "0,1,2,3"
       VLLM_MOONCAKE_LOOKAHEAD_HASHES: "1"
+      MC_GID_INDEX: 3
     security_opt:
       - seccomp:unconfined      # 解决 NUMA 系统调用被拦截的关键
     devices:
