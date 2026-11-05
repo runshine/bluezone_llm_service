@@ -1,0 +1,36 @@
+INFO 11-04 13:26:34 [worker.py:2089] Mooncake Store group layout: group=0 block_tokens=128 layers=1 layout=RankLocalStoreLayout
+INFO 11-04 13:26:34 [worker.py:2089] Mooncake Store group layout: group=1 block_tokens=32 layers=1 layout=RankLocalStoreLayout
+INFO 11-04 13:26:34 [worker.py:2089] Mooncake Store group layout: group=0 block_tokens=128 layers=1 layout=RankLocalStoreLayout
+ERROR 11-04 13:26:34 [worker.py:1353] Mooncake Store load rejected for request bad_load
+ERROR 11-04 13:26:34 [worker.py:1353] Traceback (most recent call last):
+ERROR 11-04 13:26:34 [worker.py:1353]   File "/opt/venv/lib/python3.12/site-packages/vllm/distributed/kv_transfer/kv_connector/v1/mooncake/store/worker.py", line 1347, in _handle_request
+ERROR 11-04 13:26:34 [worker.py:1353]     self._load_request(req_meta)
+ERROR 11-04 13:26:34 [worker.py:1353]   File "/usr/lib/python3.12/unittest/mock.py", line 1134, in __call__
+ERROR 11-04 13:26:34 [worker.py:1353]     return self._mock_call(*args, **kwargs)
+ERROR 11-04 13:26:34 [worker.py:1353]            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ERROR 11-04 13:26:34 [worker.py:1353]   File "/usr/lib/python3.12/unittest/mock.py", line 1138, in _mock_call
+ERROR 11-04 13:26:34 [worker.py:1353]     return self._execute_mock_call(*args, **kwargs)
+ERROR 11-04 13:26:34 [worker.py:1353]            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ERROR 11-04 13:26:34 [worker.py:1353]   File "/usr/lib/python3.12/unittest/mock.py", line 1193, in _execute_mock_call
+ERROR 11-04 13:26:34 [worker.py:1353]     raise effect
+ERROR 11-04 13:26:34 [worker.py:1353] ValueError: bad mapping
+INFO 11-04 13:26:34 [worker.py:2358] Mooncake Store lookup diagnosis: token_len=512 candidate_keys=20 candidate_blocks=20 existing_blocks=20 hit_length=512 junctions=()
+INFO 11-04 13:26:34 [worker.py:2358] Mooncake Store lookup diagnosis: token_len=512 candidate_keys=20 candidate_blocks=20 existing_blocks=20 hit_length=512 junctions=()
+WARNING 11-04 13:26:34 [worker.py:2254] Disabling Mooncake Store prefix reads: prefix-cacheable groups (1,) have blocks smaller than scheduler block_size=128 and are omitted by Store save/load. Refusing partial-group hits; local prefix caching and P/D transfer remain enabled.
+INFO 11-04 13:26:34 [worker.py:2358] Mooncake Store lookup diagnosis: token_len=512 candidate_keys=20 candidate_blocks=20 existing_blocks=4 hit_length=0 junctions=(512,)
+INFO 11-04 13:26:34 [worker.py:2358] Mooncake Store lookup diagnosis: token_len=512 candidate_keys=20 candidate_blocks=20 existing_blocks=20 hit_length=512 junctions=()
+INFO 11-04 13:26:34 [worker.py:2358] Mooncake Store lookup diagnosis: token_len=512 candidate_keys=36 candidate_blocks=20 existing_blocks=4 hit_length=0 junctions=(512,)
+{"hash_size": 8, "all_groups_reconciled_hit": 0, "worker_reported_hit": 0, "unsafe_partial_group_hit": 512, "missing_prefix_cacheable_group": 1}
+INFO 11-04 13:26:34 [worker.py:2358] Mooncake Store lookup diagnosis: token_len=512 candidate_keys=4 candidate_blocks=4 existing_blocks=4 hit_length=512 junctions=()
+WARNING 11-04 13:26:34 [worker.py:2254] Disabling Mooncake Store prefix reads: prefix-cacheable groups (1,) have blocks smaller than scheduler block_size=128 and are omitted by Store save/load. Refusing partial-group hits; local prefix caching and P/D transfer remain enabled.
+INFO 11-04 13:26:34 [worker.py:2358] Mooncake Store lookup diagnosis: token_len=512 candidate_keys=20 candidate_blocks=20 existing_blocks=4 hit_length=0 junctions=(512,)
+INFO 11-04 13:26:34 [worker.py:2358] Mooncake Store lookup diagnosis: token_len=512 candidate_keys=20 candidate_blocks=20 existing_blocks=20 hit_length=512 junctions=()
+INFO 11-04 13:26:34 [worker.py:2358] Mooncake Store lookup diagnosis: token_len=512 candidate_keys=36 candidate_blocks=20 existing_blocks=4 hit_length=0 junctions=(512,)
+{"hash_size": 32, "all_groups_reconciled_hit": 0, "worker_reported_hit": 0, "unsafe_partial_group_hit": 512, "missing_prefix_cacheable_group": 1}
+INFO 11-04 13:26:34 [worker.py:2358] Mooncake Store lookup diagnosis: token_len=512 candidate_keys=4 candidate_blocks=4 existing_blocks=4 hit_length=512 junctions=()
+W1104 13:26:34.012000 79 torch/utils/cpp_extension.py:178] No CUDA runtime is found, using CUDA_HOME='/usr/local/cuda'
+..........
+----------------------------------------------------------------------
+Ran 10 tests in 0.013s
+
+OK

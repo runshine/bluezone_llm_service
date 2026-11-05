@@ -1213,6 +1213,10 @@ class Scheduler(SchedulerInterface):
                     # Not for diffusion where draft tokens can't be padded.
                     if (
                         (self.num_spec_tokens > 0 and self.dynamic_sd_lookup is None)
+                        # V2 does not propagate invalid padding proposals to its
+                        # verifier: a new slot's zero drafts can become BOS.
+                        # Keep real speculation; only disable this fake padding.
+                        and not self.vllm_config.use_v2_model_runner
                         and self.num_sampled_tokens_per_step > 0
                         and num_new_tokens == 1
                         and (scheduled_running_reqs and not prefill_scheduled)
