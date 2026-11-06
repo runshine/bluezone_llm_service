@@ -621,7 +621,12 @@ class Scheduler(SchedulerInterface):
                 num_external_computed_tokens,
             )
 
-        if atomic_boundary <= num_local_computed_tokens:
+        # External load metadata still describes the original hit boundary.
+        # After MM clipping, fall back to a verified local-only prefix.
+        if (
+            atomic_boundary <= num_local_computed_tokens
+            or num_external_computed_tokens > 0
+        ):
             # Sparse groups return a tail-only hit. Slicing it would preserve
             # null blocks at the earlier resume point instead of its SWA state.
             while True:

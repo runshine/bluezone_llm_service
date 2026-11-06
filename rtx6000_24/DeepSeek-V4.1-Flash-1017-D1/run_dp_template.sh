@@ -14,6 +14,9 @@ export PYTHONHASHSEED=0
 pip install mooncake-transfer-engine-cuda13 
 #pip install nixl
 
+# Validate the real IPv4 RoCE-v2 GID before creating either transfer engine.
+python3 /opt/workspace/validate_roce_gid.py --device mlx5_4 || exit $?
+
 vllm serve /data/models/deepseek-ai/DeepSeek-V4.1-Flash-1017/ \
     --served-model-name deepseek-v4.1-flash \
     --host 0.0.0.0 \
@@ -48,16 +51,19 @@ vllm serve /data/models/deepseek-ai/DeepSeek-V4.1-Flash-1017/ \
     "kv_connector": "MultiConnector",
     "kv_role": "kv_consumer",
     "kv_connector_extra_config": {
-      "device_name": "mlx5_4",
       "connectors": [
         {
           "kv_connector": "MooncakeConnector",
-          "kv_role": "kv_consumer"
+          "kv_role": "kv_consumer",
+          "kv_connector_extra_config": {
+            "device_name": "mlx5_4"
+          }
         },
         {
           "kv_connector": "MooncakeStoreConnector",
           "kv_role": "kv_consumer",
           "kv_connector_extra_config": {
+            "device_name": "mlx5_4",
             "enable_mixed_group_store": true
           }
         }
